@@ -7,7 +7,7 @@
 //         Ajax powered search and replace for the manager.
 //
 //   Version:
-//         1.6.1
+//         1.7
 //
 //   Created by:
 // 	    Bogdan Günther (http://www.medianotions.de - bg@medianotions.de)
@@ -217,7 +217,7 @@ function printResultTables($area, $search, $searchOptions, $theme, $results, $se
                     }
                     $output .= '
                         <td class="functions">
-                            <a href="' . $urlEdit . '" title="[+lang.edit+]"><img src="media/style/[+options.theme+]/images/icons/save.png" alt="[+lang.edit+]"/></a>
+                            <a href="' . $urlEdit . '" title="[+lang.edit+]"><img src="media/style/[+options.theme+]/images/icons/write.png" alt="[+lang.edit+]"/></a>
                             <a href="' . $urlInfo . '" title="[+lang.info+]"><img src="media/style/[+options.theme+]/images/tree/page-html.gif" alt="[+lang.info+]"/></a>
                             <a href="' . $urlOpen . '" title="[+lang.preview+]" target="_blank"><img src="media/style/[+options.theme+]/images/icons/page_white_magnify.png" alt="[+lang.preview+]"/></a>
                         </td>
@@ -305,7 +305,7 @@ function printResultTables($area, $search, $searchOptions, $theme, $results, $se
                     }
                     $output .= '
                         <td class="functions">
-                            <a href="' . $urlEdit . '" title="[+lang.edit+]"><img src="media/style/[+options.theme+]/images/icons/save.png" alt="[+lang.edit+]"/></a>
+                            <a href="' . $urlEdit . '" title="[+lang.edit+]"><img src="media/style/[+options.theme+]/images/icons/write.png" alt="[+lang.edit+]"/></a>
                         </td>
                     </tr>';
 
@@ -370,8 +370,8 @@ function printResultTables($area, $search, $searchOptions, $theme, $results, $se
                         // set values for the documents
                         if ($section['id'] == "DocAndTVV") {
                             // set URLs
-                            $urlEdit = "index.php?a=" . $searchPlacesArray[$area]['edit'] . "&amp;id=" . $searchResults['id'];
-                            $urlInfo = "index.php?a=" . $searchPlacesArray[$area]['info'] . "&amp;id=" . $searchResults['id'];
+                            $urlEdit = "index.php?a=" . $section['edit'] . "&amp;id=" . $searchResults['id'];
+                            $urlInfo = "index.php?a=" . $section['info'] . "&amp;id=" . $searchResults['id'];
                             $urlOpen = $modx->makeUrl(intval($searchResults['id']));
 
                             // set values
@@ -381,7 +381,7 @@ function printResultTables($area, $search, $searchOptions, $theme, $results, $se
                             $editedon = date("d-m-Y", $searchResults['editedon']);
                         } else { // set values for the resources
                             // set URLs
-                            $urlEdit = "index.php?a=" . $searchPlacesArray[$area]['edit'] . "&amp;id=" . $searchResults['id'];
+                            $urlEdit = "index.php?a=" . $section['edit'] . "&amp;id=" . $searchResults['id'];
 
                             // set values
                             if ($searchResults['templatename']) $searchResults['name'] = $searchResults['templatename'];
@@ -415,7 +415,7 @@ function printResultTables($area, $search, $searchOptions, $theme, $results, $se
                         }
                         $output .= '
                             <td class="functions">
-                                <a href="' . $urlEdit . '" title="[+lang.edit+]"><img src="media/style/[+options.theme+]/images/icons/save.png" alt="[+lang.edit+]"/></a>';
+                                <a href="' . $urlEdit . '" title="[+lang.edit+]"><img src="media/style/[+options.theme+]/images/icons/write.png" alt="[+lang.edit+]"/></a>';
                         if ($section['id'] == "DocAndTVV") {
                             $output .= '
                                 <a href="' . $urlInfo . '" title="[+lang.info+]"><img src="media/style' . $theme . '/images/tree/page-html.gif" alt="[+lang.info+]"/></a>
@@ -491,14 +491,9 @@ function getDocAndTVVResults($search, $searchOptions)
             if (!$sqlWhere) continue;
         }
 
-        // complete SQL query
-        $sql = "SELECT $sqlSelection FROM $dbTable $sqlWhere";
-
-        // query DB via MODx DB API
-        $result = $modx->db->query($sql);
-
         // get rows
-        while ($row = $modx->fetchRow($result)) {
+        $result = $modx->db->select($sqlSelection, $dbTable, $sqlWhere);
+        while ($row = $modx->db->getRow($result)) {
             // check created date range
             if ($row['createdon'] < $searchOptions['createdon_start_time'] or $row['createdon'] > $searchOptions['createdon_end_time']) continue;
 
@@ -538,16 +533,9 @@ function getDocAndTVVResults($search, $searchOptions)
         // get SQL WHERE
         $sqlWhere = getSqlWhere($search['string'], 'value', $searchOptions);
 
-        // complete SQL query
-        $sqlTVNames = "SELECT id, name FROM $tableTV_Names";
-        $sqlTVContent = "SELECT contentid, value, tmplvarid, id FROM $tableTV_Content $sqlWhere";
-
-        // query DB via MODx DB API
-        $resultTVNames = $modx->db->query($sqlTVNames);
-        $resultTVContent = $modx->db->query($sqlTVContent);
-
         // get rows TV names
-        while ($row = $modx->fetchRow($resultTVNames)) {
+        $resultTVNames = $modx->db->select("id, name", $tableTV_Names);
+        while ($row = $modx->db->getRow($resultTVNames)) {
             $id = $row['id'];
             $name = $row['name'];
 
@@ -556,7 +544,8 @@ function getDocAndTVVResults($search, $searchOptions)
         }
 
         // get rows TV content
-        while ($row = $modx->fetchRow($resultTVContent)) {
+        $resultTVContent = $modx->db->select("contentid, value, tmplvarid, id", $tableTV_Content, $sqlWhere);
+        while ($row = $modx->db->getRow($resultTVContent)) {
             $id = $row['contentid'];
 
             // checkParents
@@ -631,14 +620,9 @@ function getResourcesResults($area, $search, $searchOptions)
             if (!$sqlWhere) continue;
         }
 
-        // complete SQL query
-        $sql = "SELECT $sqlSelection FROM $dbTable $sqlWhere";
-
-        // query DB via MODx DB API
-        $result = $modx->db->query($sql);
-
         // get rows
-        while ($row = $modx->fetchRow($result)) {
+        $result = $modx->db->select($sqlSelection, $dbTable, $sqlWhere);
+        while ($row = $modx->db->getRow($result)) {
             $id = $row['id'];
 
             // save results in our results array
@@ -676,8 +660,10 @@ function replace($searchString, $replaceString, $id, $searchFieldName, $searchFi
 
 function getSqlWhere($searchString, $searchField, $searchOptions)
 {
+    global $modx;
+
     // prepare SQL Query
-    $sqlWhere = mysql_real_escape_string($searchString);
+    $sqlWhere = $modx->db->escape($searchString);
 
     // take care of ID search
     if ($searchField == 'id' and is_numeric($searchString)) return 'WHERE ' . $searchField . '=' . $searchString;
@@ -761,7 +747,7 @@ function printDocumentBranch($parentsArray)
 
     // print Site
     $output = '
-    &gt; <a href="index.php?a=2">' . $modx->config['site_name'] . ' (0)</a>';
+    <a href="index.php?a=2">' . $modx->config['site_name'] . ' (0)</a>';
 
     if (is_array($parentsArray)) {
         // reverse branch array create output
