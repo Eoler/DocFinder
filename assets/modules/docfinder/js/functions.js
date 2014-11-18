@@ -26,34 +26,35 @@ var ajaxRequest, delay, timer, oldSearchstring;
 var time = 0;
 
 window.addEvent('load', function () {
+    new Tips($$('.tooltip'), {className: 'custom'} );
 
     // check search string and set submit buttons
     triggerSubmitButtons();
 
     // init date pickers
     new vlaDatePicker('createdon_start', {
-        style: 'apple_widget',
+        style: 'adobe_cs3',
         offset: { x: 3, y: -1 },
         separator: '-',
         filePath: module_url + 'js/vlaCal.v2/inc/'
     });
 
     new vlaDatePicker('createdon_end', {
-        style: 'apple_widget',
+        style: 'adobe_cs3',
         offset: { x: 3, y: -1 },
         separator: '-',
         filePath: module_url + 'js/vlaCal.v2/inc/'
     });
 
     new vlaDatePicker('editedon_start', {
-        style: 'apple_widget',
+        style: 'adobe_cs3',
         offset: { x: 3, y: -1 },
         separator: '-',
         filePath: module_url + 'js/vlaCal.v2/inc/'
     });
 
     new vlaDatePicker('editedon_end', {
-        style: 'apple_widget',
+        style: 'adobe_cs3',
         offset: { x: 3, y: -1 },
         separator: '-',
         filePath: module_url + 'js/vlaCal.v2/inc/'

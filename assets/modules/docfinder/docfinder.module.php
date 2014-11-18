@@ -59,7 +59,7 @@ $options['module_url'] = DF_PATH;
 
 
 // set Theme
-$theme = '/MODxCarbon';
+$theme='/'.$modx->config['manager_theme'];
 
 // load text direction as seen in Doc manager
 if (isset($modx->config['manager_direction'])) $dir = ($modx->config['manager_direction'] == 'rtl' ? 'dir="rtl"' : '');
